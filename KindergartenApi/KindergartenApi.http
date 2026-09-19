@@ -1,0 +1,61 @@
+@KindergartenApi_HostAddress = http://localhost:5298
+
+
+### 1. GET - Vaata kõiki lasteaia gruppe
+
+GET {{KindergartenApi_HostAddress}}/api/Kindergarten
+Accept: application/json
+
+
+###
+
+
+### 2. GET - Vaata ühte lasteaia gruppi ID järgi
+
+GET {{KindergartenApi_HostAddress}}/api/Kindergarten/2
+Accept: application/json
+
+
+###
+
+
+### 3. POST - Lisa uus lasteaia grupp
+
+POST {{KindergartenApi_HostAddress}}/api/Kindergarten
+Content-Type: application/json
+
+{
+  "groupName": "Tähekesed",
+  "childrenCount": 14,
+  "kindergartenName": "Päikesekiire Lasteaed",
+  "teacherName": "Laura Tamm"
+}
+
+
+###
+
+
+### 4. PUT - Uuenda olemasolevat lasteaia gruppi
+
+PUT {{KindergartenApi_HostAddress}}/api/Kindergarten/2
+Content-Type: application/json
+
+{
+  "id": 2,
+  "groupName": "Vikerkaared",
+  "childrenCount": 16,
+  "kindergartenName": "Päikesekiire Lasteaed",
+  "teacherName": "Kristi Saar"
+}
+
+
+###
+
+
+### 5. DELETE - Kustuta lasteaia grupp
+
+DELETE {{KindergartenApi_HostAddress}}/api/Kindergarten/3
+Accept: application/json
+
+
+###
