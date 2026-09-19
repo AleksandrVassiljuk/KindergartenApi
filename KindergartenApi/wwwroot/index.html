@@ -1,0 +1,266 @@
+﻿<!DOCTYPE html>
+<html lang="et">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kindergarten</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+            color: #222;
+        }
+
+        header {
+            background: white;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+            header h1 {
+                margin: 0;
+                font-size: 36px;
+            }
+
+            header p {
+                color: #666;
+            }
+
+        .container {
+            width: 90%;
+            max-width: 1100px;
+            margin: 40px auto;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 7px;
+        }
+
+        button {
+            border: none;
+            padding: 11px 18px;
+            border-radius: 7px;
+            cursor: pointer;
+        }
+
+        .add-button {
+            background: #222;
+            color: white;
+            margin-top: 15px;
+        }
+
+        .edit-button {
+            background: #e9ecef;
+        }
+
+        .delete-button {
+            background: #dc3545;
+            color: white;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 14px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #f8f9fa;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>🏫 Kindergarten</h1>
+        <p>Lasteaia gruppide haldamine</p>
+    </header>
+
+    <div class="container">
+
+        <div class="card">
+            <h2>Lisa uus grupp</h2>
+
+            <div class="form-grid">
+                <input id="groupName" placeholder="Grupi nimi">
+                <input id="childrenCount" type="number" placeholder="Laste arv">
+                <input id="kindergartenName" placeholder="Lasteaia nimi">
+                <input id="teacherName" placeholder="Õpetaja nimi">
+            </div>
+
+            <button class="add-button" onclick="addKindergarten()">
+                + Lisa grupp
+            </button>
+        </div>
+
+        <div class="card">
+            <h2>Lasteaia grupid</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Grupp</th>
+                        <th>Laste arv</th>
+                        <th>Lasteaed</th>
+                        <th>Õpetaja</th>
+                        <th>Tegevused</th>
+                    </tr>
+                </thead>
+
+                <tbody id="kindergartenTable"></tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <script>
+    const apiUrl = "/api/Kindergarten";
+
+    async function loadKindergartens() {
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+
+        const table = document.getElementById("kindergartenTable");
+        table.innerHTML = "";
+
+        data.forEach(item => {
+            table.innerHTML += `
+                <tr>
+                    <td>${item.id}</td>
+                    <td>${item.groupName}</td>
+                    <td>${item.childrenCount}</td>
+                    <td>${item.kindergartenName}</td>
+                    <td>${item.teacherName}</td>
+                    <td class="actions">
+                        <button class="edit-button"
+                            onclick="editKindergarten(${item.id})">
+                            Muuda
+                        </button>
+
+                        <button class="delete-button"
+                            onclick="deleteKindergarten(${item.id})">
+                            Kustuta
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    async function addKindergarten() {
+        const kindergarten = {
+            groupName: document.getElementById("groupName").value,
+            childrenCount: Number(
+                document.getElementById("childrenCount").value
+            ),
+            kindergartenName:
+                document.getElementById("kindergartenName").value,
+            teacherName:
+                document.getElementById("teacherName").value
+        };
+
+        await fetch(apiUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(kindergarten)
+        });
+
+        document.getElementById("groupName").value = "";
+        document.getElementById("childrenCount").value = "";
+        document.getElementById("kindergartenName").value = "";
+        document.getElementById("teacherName").value = "";
+
+        loadKindergartens();
+    }
+
+    async function deleteKindergarten(id) {
+        if (!confirm("Kas soovid selle grupi kustutada?")) {
+            return;
+        }
+
+        await fetch(`${apiUrl}/${id}`, {
+            method: "DELETE"
+        });
+
+        loadKindergartens();
+    }
+
+    async function editKindergarten(id) {
+        const response = await fetch(`${apiUrl}/${id}`);
+        const item = await response.json();
+
+        const groupName = prompt("Grupi nimi:", item.groupName);
+        if (groupName === null) return;
+
+        const childrenCount = prompt("Laste arv:", item.childrenCount);
+        if (childrenCount === null) return;
+
+        const kindergartenName =
+            prompt("Lasteaia nimi:", item.kindergartenName);
+        if (kindergartenName === null) return;
+
+        const teacherName = prompt("Õpetaja nimi:", item.teacherName);
+        if (teacherName === null) return;
+
+        const updatedItem = {
+            id: item.id,
+            groupName: groupName,
+            childrenCount: Number(childrenCount),
+            kindergartenName: kindergartenName,
+            teacherName: teacherName
+        };
+
+        await fetch(`${apiUrl}/${id}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(updatedItem)
+        });
+
+        loadKindergartens();
+    }
+
+    loadKindergartens();
+    </script>
+
+</body>
+</html>

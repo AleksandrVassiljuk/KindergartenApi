@@ -13,6 +13,10 @@ var app = builder.Build();
 
 app.UseHttpsRedirection();
 
+// Kuvab wwwroot/index.html veebilehe
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 app.UseAuthorization();
 
 app.MapControllers();
